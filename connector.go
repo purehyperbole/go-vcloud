@@ -15,6 +15,7 @@ type Config struct {
 // Connector ...
 type Connector struct {
 	Config    *Config
+	Client    *http.Client
 	AuthToken string
 }
 
@@ -22,6 +23,7 @@ type Connector struct {
 func NewConnector(config *Config) *Connector {
 	connector := Connector{}
 	connector.Config = config
+	connector.Client = &http.Client{}
 	return &connector
 }
 
@@ -29,7 +31,6 @@ func NewConnector(config *Config) *Connector {
 func (c *Connector) Authenticate() error {
 	url := fmt.Sprintf("https://%s/api/sessions", c.Config.URL)
 
-	client := &http.Client{}
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		return err
@@ -37,11 +38,45 @@ func (c *Connector) Authenticate() error {
 
 	req.SetBasicAuth(c.Config.Username, c.Config.Password)
 	req.Header.Set("accept", "application/*+xml;version=5.1")
-	resp, err := client.Do(req)
+	resp, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
 
 	c.AuthToken = resp.Header.Get("x-vcloud-authorization")
 	return nil
+}
+
+// Get ...
+func (c *Connector) Get(uri string) (*http.Response, error) {
+	url := fmt.Sprintf("https://%s/api/%s", c.Config.URL, uri)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("accept", "application/*+xml;version=5.1")
+	req.Header.Set("x-vcloud-authorization", c.AuthToken)
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+// Post ...
+func (c *Connector) Post() {
+
+}
+
+// Put ...
+func (c *Connector) Put() {
+
+}
+
+// Delete ...
+func (c *Connector) Delete() {
+
 }

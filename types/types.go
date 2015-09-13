@@ -2,6 +2,19 @@ package types
 
 import "encoding/xml"
 
+// OrgList ...
+type OrgList struct {
+	XMLName xml.Name `xml:"OrgList"`
+	Org     []Org    `xml:"Org"`
+}
+
+// Org ...
+type Org struct {
+	XMLName xml.Name `xml:"Org"`
+	Name    string   `xml:"name,attr"`
+	Href    string   `xml:"href,attr"`
+}
+
 // IPRange ...
 type IPRange struct {
 	XMLName      xml.Name `xml:"IpRange"`
