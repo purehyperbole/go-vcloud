@@ -4,12 +4,12 @@ import "encoding/xml"
 
 // OrgList ...
 type OrgList struct {
-	XMLName xml.Name `xml:"OrgList"`
-	Org     []Org    `xml:"Org"`
+	XMLName xml.Name     `xml:"OrgList"`
+	Org     []OrgListOrg `xml:"Org"`
 }
 
-// Org ...
-type Org struct {
+// OrgListOrg ...
+type OrgListOrg struct {
 	XMLName xml.Name `xml:"Org"`
 	Name    string   `xml:"name,attr"`
 	Href    string   `xml:"href,attr"`

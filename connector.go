@@ -56,7 +56,7 @@ func (c *Connector) Get(uri string) (*http.Response, error) {
 		return nil, err
 	}
 
-	req.Header.Set("accept", "application/*+xml;version=5.1")
+	req.Header.Set("accept", "application/*+xml;version=5.5")
 	req.Header.Set("x-vcloud-authorization", c.AuthToken)
 	resp, err := c.Client.Do(req)
 	if err != nil {

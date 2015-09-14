@@ -17,39 +17,64 @@ type Org struct {
 }
 
 // OrgList ...
-func OrgList(c *Connector) *[]t.Org {
-	orgList := t.OrgList{}
-
+func OrgList(c *Connector) *[]t.OrgListOrg {
 	resp, err := c.Get("org")
 	if err != nil {
 		log.Println(err)
 	}
 
-	err = ParseResponse(resp, orgList)
+	data, err := ParseResponse(resp)
 	if err != nil {
 		log.Println(err)
 	}
+
+	orgList := ParseOrgList(data)
 
 	return &orgList.Org
 }
 
 // NewOrg ...
 func NewOrg(c *Connector, name string) *Org {
-	org := Org{Connector: c}
 	href := findOrgHref(c, name)
 	url, err := url.Parse(href)
 
-	if href != "" && err == nil {
-		resp, err := c.Get(url.RequestURI())
-		if err != nil {
-			log.Println(err)
-		}
-		err = ParseResponse(resp, org)
-		if err != nil {
-			log.Println(err)
-		}
+	if href == "" && err != nil {
+		log.Println(err)
 	}
 
+	resp, err := c.Get(url.RequestURI())
+	if err != nil {
+		log.Println(err)
+	}
+
+	data, err := ParseResponse(resp)
+	if err != nil {
+		log.Println(err)
+	}
+
+	org := ParseOrg(data)
+	org.Connector = c
+
+	return org
+}
+
+// ParseOrgList ...
+func ParseOrgList(d *[]byte) *t.OrgList {
+	org := t.OrgList{}
+	err := xml.Unmarshal(*d, &org)
+	if err != nil {
+		log.Println(err)
+	}
+	return &org
+}
+
+// ParseOrg ...
+func ParseOrg(d *[]byte) *Org {
+	org := Org{}
+	err := xml.Unmarshal(*d, &org)
+	if err != nil {
+		log.Println(err)
+	}
 	return &org
 }
 
@@ -68,7 +93,6 @@ func (o *Org) GetDatacenter(name string) *Datacenter {
 func findOrgHref(c *Connector, name string) string {
 	orgs := OrgList(c)
 	for _, org := range *orgs {
-		log.Println(org)
 		if org.Name == name {
 			return org.Href
 		}
