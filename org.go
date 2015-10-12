@@ -10,15 +10,19 @@ import (
 
 // Org ...
 type Org struct {
-	Connector *Connector
-	XMLName   xml.Name `xml:"Org"`
-	Name      string   `xml:"name,attr"`
-	Href      string   `xml:"href,attr"`
+	Connector   *Connector
+	XMLName     xml.Name `xml:"Org"`
+	ID          string   `xml:"id,attr"`
+	Name        string   `xml:"name,attr"`
+	Href        string   `xml:"href,attr"`
+	Links       []t.Link `xml:"Link"`
+	Description string   `xml:"Description,value"`
+	FullName    string   `xml:"FullName,value"`
 }
 
 // OrgList ...
 func OrgList(c *Connector) *[]t.OrgListOrg {
-	resp, err := c.Get("org")
+	resp, err := c.Get("/api/org")
 	if err != nil {
 		log.Println(err)
 	}
@@ -79,15 +83,26 @@ func ParseOrg(d *[]byte) *Org {
 }
 
 // Datacenters ...
-func (o *Org) Datacenters() *[]string {
+func (o *Org) Datacenters() []string {
 	var datacenters []string
-	return &datacenters
+	return datacenters
 }
 
 // GetDatacenter ...
 func (o *Org) GetDatacenter(name string) *Datacenter {
 	datacenter := NewDatacenter(o.Connector, "")
 	return datacenter
+}
+
+// Networks ...
+func Networks() []string {
+	var networks []string
+	return networks
+}
+
+// GetNetwork ...
+func GetNetwork(name string) {
+
 }
 
 func findOrgHref(c *Connector, name string) string {

@@ -49,7 +49,9 @@ func (c *Connector) Authenticate() error {
 
 // Get ...
 func (c *Connector) Get(uri string) (*http.Response, error) {
-	url := fmt.Sprintf("https://%s/api/%s", c.Config.URL, uri)
+	url := fmt.Sprintf("https://%s%s", c.Config.URL, uri)
+
+	fmt.Println(url)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -61,6 +63,10 @@ func (c *Connector) Get(uri string) (*http.Response, error) {
 	resp, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		fmt.Println("error, non-200 code returned")
 	}
 
 	return resp, nil
@@ -80,3 +86,7 @@ func (c *Connector) Put() {
 func (c *Connector) Delete() {
 
 }
+
+//func newError(bo) error {
+
+//}

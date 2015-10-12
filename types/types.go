@@ -2,15 +2,30 @@ package types
 
 import "encoding/xml"
 
+// Link ...
+type Link struct {
+	Type string `xml:"type,attr"`
+	Name string `xml:"name,attr"`
+}
+
 // OrgList ...
 type OrgList struct {
 	XMLName xml.Name     `xml:"OrgList"`
 	Org     []OrgListOrg `xml:"Org"`
 }
 
+// Error ...
+type Error struct {
+	XMLName        xml.Name `xml:"Error"`
+	MinorErrorCode string   `xml:"minorErrorCode,attr"`
+	MajorErrorCode string   `xml:"majorErrorCode,attr"`
+	Message        string   `xml:"message,attr"`
+}
+
 // OrgListOrg ...
 type OrgListOrg struct {
 	XMLName xml.Name `xml:"Org"`
+	ID      string   `xml:"id,attr"`
 	Name    string   `xml:"name,attr"`
 	Href    string   `xml:"href,attr"`
 }
