@@ -32,7 +32,7 @@ func OrgList(c *Connector) *[]t.OrgListOrg {
 		log.Println(err)
 	}
 
-	orgList := ParseOrgList(data)
+	orgList := parseOrgList(data)
 
 	return &orgList.Org
 }
@@ -56,14 +56,13 @@ func NewOrg(c *Connector, name string) *Org {
 		log.Println(err)
 	}
 
-	org := ParseOrg(data)
+	org := parseOrg(data)
 	org.Connector = c
 
 	return org
 }
 
-// ParseOrgList ...
-func ParseOrgList(d *[]byte) *t.OrgList {
+func parseOrgList(d *[]byte) *t.OrgList {
 	org := t.OrgList{}
 	err := xml.Unmarshal(*d, &org)
 	if err != nil {
@@ -72,8 +71,7 @@ func ParseOrgList(d *[]byte) *t.OrgList {
 	return &org
 }
 
-// ParseOrg ...
-func ParseOrg(d *[]byte) *Org {
+func parseOrg(d *[]byte) *Org {
 	org := Org{}
 	err := xml.Unmarshal(*d, &org)
 	if err != nil {
@@ -83,26 +81,35 @@ func ParseOrg(d *[]byte) *Org {
 }
 
 // Datacenters ...
-func (o *Org) Datacenters() []string {
-	var datacenters []string
+func (o *Org) Datacenters() []t.Link {
+	datacenters := o.findLinks("application/vnd.vmware.vcloud.vdc+xml")
 	return datacenters
 }
 
 // GetDatacenter ...
 func (o *Org) GetDatacenter(name string) *Datacenter {
-	datacenter := NewDatacenter(o.Connector, "")
+	url := o.findLink("application/vnd.vmware.vcloud.vdc+xml", name)
+	datacenter := NewDatacenter(o.Connector, url)
 	return datacenter
 }
 
 // Networks ...
-func Networks() []string {
-	var networks []string
+func (o *Org) Networks() []t.Link {
+	networks := o.findLinks("application/vnd.vmware.vcloud.orgNetwork+xml")
 	return networks
 }
 
 // GetNetwork ...
-func GetNetwork(name string) {
+func (o *Org) GetNetwork(name string) *Network {
+	url := o.findLink("application/vnd.vmware.vcloud.vdc+xml", name)
+	network := NewNetwork(o.Connector, url)
+	return network
+}
 
+// Catalogs ...
+func (o *Org) Catalogs() []t.Link {
+	catalogs := o.findLinks("application/vnd.vmware.vcloud.catalog+xml")
+	return catalogs
 }
 
 func findOrgHref(c *Connector, name string) string {
@@ -110,6 +117,25 @@ func findOrgHref(c *Connector, name string) string {
 	for _, org := range *orgs {
 		if org.Name == name {
 			return org.Href
+		}
+	}
+	return ""
+}
+
+func (o *Org) findLinks(xt string) []t.Link {
+	var links []t.Link
+	for _, link := range o.Links {
+		if link.Type == xt {
+			links = append(links, link)
+		}
+	}
+	return links
+}
+
+func (o *Org) findLink(xt string, name string) string {
+	for _, link := range o.Links {
+		if link.Type == xt && link.Name == name {
+			return link.Href
 		}
 	}
 	return ""

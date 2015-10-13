@@ -4,8 +4,10 @@ import "encoding/xml"
 
 // Link ...
 type Link struct {
-	Type string `xml:"type,attr"`
-	Name string `xml:"name,attr"`
+	XMLName xml.Name `xml:"Link"`
+	Type    string   `xml:"type,attr"`
+	Name    string   `xml:"name,attr"`
+	Href    string   `xml:"href,attr"`
 }
 
 // OrgList ...
@@ -92,4 +94,41 @@ type Configuration struct {
 type ExternalNetwork struct {
 	XMLName       xml.Name      `xml:"ExternalNetwork"`
 	Configuration Configuration `xml:"Configuration"`
+}
+
+// ComputeCapacity ...
+type ComputeCapacity struct {
+	XMLName xml.Name `xml:"ComputeCapacity"`
+	CPU     struct {
+		Units     string `xml:"Units,value"`
+		Allocated int    `xml:"Allocated,value"`
+		Limit     int    `xml:"Limit,value"`
+		Reserved  int    `xml:"Reserved,value"`
+		Used      int    `xml:"Used,value"`
+		Overhead  int    `xml:"Overhead,value"`
+	} `xml:"Cpu"`
+	Memory struct {
+		Units     string `xml:"Units,value"`
+		Allocated int    `xml:"Allocated,value"`
+		Limit     int    `xml:"Limit,value"`
+		Reserved  int    `xml:"Reserved,value"`
+		Used      int    `xml:"Used,value"`
+		Overhead  int    `xml:"Overhead,value"`
+	} `xml:"memory"`
+}
+
+// AvailableNetwork ...
+type AvailableNetwork struct {
+	XMLName xml.Name `xml:"Network"`
+	Type    string   `xml:"type,attr"`
+	Name    string   `xml:"name,attr"`
+	Href    string   `xml:"href,attr"`
+}
+
+// ResourceEntity ...
+type ResourceEntity struct {
+	XMLName xml.Name `xml:"ResourceEntity"`
+	Type    string   `xml:"type,attr"`
+	Name    string   `xml:"name,attr"`
+	Href    string   `xml:"href,attr"`
 }
