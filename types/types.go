@@ -4,10 +4,10 @@ import "encoding/xml"
 
 // Link ...
 type Link struct {
-	XMLName xml.Name `xml:"Link"`
-	Type    string   `xml:"type,attr"`
-	Name    string   `xml:"name,attr"`
-	Href    string   `xml:"href,attr"`
+	Rel  string `xml:"rel,attr"`
+	Type string `xml:"type,attr"`
+	Name string `xml:"name,attr"`
+	Href string `xml:"href,attr"`
 }
 
 // OrgList ...
@@ -76,6 +76,12 @@ type IPScope struct {
 	SubAllocations       SubAllocations       `xml:"SubAllocations"`
 	IPRanges             IPRanges             `xml:"IpRanges"`
 	AllocatedIPAddresses AllocatedIPAddresses `xml:"AllocatedIpAddresses"`
+	IsInherited          string               `xml:"IsInherited,value"`
+	Gateway              string               `xml:"Gateway,value"`
+	Netmask              string               `xml:"Netmask,value"`
+	DNS1                 string               `xml:"Dns1,value"`
+	DNS2                 string               `xml:"Dns2,value"`
+	IsEnabled            bool                 `xml:"IsEnabled,value"`
 }
 
 // IPScopes ...
@@ -117,18 +123,40 @@ type ComputeCapacity struct {
 	} `xml:"memory"`
 }
 
-// AvailableNetwork ...
-type AvailableNetwork struct {
-	XMLName xml.Name `xml:"Network"`
-	Type    string   `xml:"type,attr"`
-	Name    string   `xml:"name,attr"`
-	Href    string   `xml:"href,attr"`
+// AvailableNetworks ...
+type AvailableNetworks struct {
+	XMLName  xml.Name `xml:"AvailableNetworks"`
+	Networks []Link   `xml:"Network"`
 }
 
-// ResourceEntity ...
-type ResourceEntity struct {
-	XMLName xml.Name `xml:"ResourceEntity"`
-	Type    string   `xml:"type,attr"`
-	Name    string   `xml:"name,attr"`
-	Href    string   `xml:"href,attr"`
+// ResourceEntities ...
+type ResourceEntities struct {
+	XMLName  xml.Name `xml:"ResourceEntities"`
+	Entities []Link   `xml:"ResourceEntity"`
+}
+
+// QueryResultRecords ...
+type QueryResultRecords struct {
+	XMLName            xml.Name `xml:"QueryResultRecords"`
+	Total              int      `xml:"total,attr"`
+	PageSize           int      `xml:"pageSize,attr"`
+	Page               int      `xml:"page,attr"`
+	EdgeGatewayRecords []Link   `xml:"EdgeGatewayRecord"`
+}
+
+// GatewayConfiguration ...
+type GatewayConfiguration struct {
+	XMLName                     xml.Name `xml:"Configuration"`
+	GatewayBackingConfiguration string   `xml:"GatewayBackingConfiguration,value"`
+	GatewayInterfaces           struct {
+		Interfaces []struct {
+			Name                string `xml:"Name,value"`
+			Network             Link   `xml:"Network"`
+			SubnetParticipation struct {
+				Gateway   string `xml:"Gateway,value"`
+				Netmask   string `xml:"Netmask,value"`
+				IPAddress string `xml:"IpAddress,value"`
+			} `xml:"SubnetParticipation"`
+		} `xml:"GatewayInterface"`
+	} `xml:"GatewayInterfaces"`
 }

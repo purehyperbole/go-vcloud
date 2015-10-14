@@ -40,13 +40,13 @@ func OrgList(c *Connector) *[]t.OrgListOrg {
 // NewOrg ...
 func NewOrg(c *Connector, name string) *Org {
 	href := findOrgHref(c, name)
-	url, err := url.Parse(href)
+	oURL, err := url.Parse(href)
 
 	if href == "" && err != nil {
 		log.Println(err)
 	}
 
-	resp, err := c.Get(url.RequestURI())
+	resp, err := c.Get(oURL.RequestURI())
 	if err != nil {
 		log.Println(err)
 	}

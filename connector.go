@@ -1,6 +1,7 @@
 package vcloud
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 )
@@ -73,8 +74,29 @@ func (c *Connector) Get(uri string) (*http.Response, error) {
 }
 
 // Post ...
-func (c *Connector) Post() {
+func (c *Connector) Post(uri string, data []byte, contentType string) (*http.Response, error) {
+	url := fmt.Sprintf("https://%s%s", c.Config.URL, uri)
 
+	fmt.Println(url)
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("accept", "application/*+xml;version=5.5")
+	req.Header.Set("x-vcloud-authorization", c.AuthToken)
+	req.Header.Set("Content-Type", contentType)
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != 201 {
+		fmt.Println("error, non-201 code returned")
+	}
+
+	return resp, nil
 }
 
 // Put ...
