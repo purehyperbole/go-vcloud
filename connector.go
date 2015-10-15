@@ -77,8 +77,6 @@ func (c *Connector) Get(uri string) (*http.Response, error) {
 func (c *Connector) Post(uri string, data []byte, contentType string) (*http.Response, error) {
 	url := fmt.Sprintf("https://%s%s", c.Config.URL, uri)
 
-	fmt.Println(url)
-
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err

@@ -93,11 +93,8 @@ func (d *Datacenter) GetNetwork(name string) *Network {
 }
 
 // CreateNetwork ...
-func (d *Datacenter) CreateNetwork(n *Network) (*Task, error) {
-	task := Task{}
-
+func (d *Datacenter) CreateNetwork(n *Network) (*Network, error) {
 	links := d.findLinks("application/vnd.vmware.vcloud.orgVdcNetwork+xml")
-	fmt.Println(links)
 	cnURL, err := url.Parse(links[0].Href)
 
 	if err != nil {
@@ -113,17 +110,14 @@ func (d *Datacenter) CreateNetwork(n *Network) (*Task, error) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	tdata, err := ParseResponse(resp)
+	nw := Network{}
+	nwdata, err := ParseResponse(resp)
+	err = xml.Unmarshal(*nwdata, &nw)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	err = xml.Unmarshal(*tdata, &task)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return &task, nil
+	return &nw, nil
 }
 
 func (d *Datacenter) findLinks(xt string) []t.Link {
