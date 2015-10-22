@@ -24,7 +24,7 @@ type EdgeGateway struct {
 }
 
 // FindEdgeGateway ...
-func FindEdgeGateway(c *Connector, dcHref string, name string) *EdgeGateway {
+func FindEdgeGateway(c *Connector, dcHref string, name string) (*EdgeGateway, error) {
 	q := Query{
 		Connector: c,
 		Type:      "edgeGateway",
@@ -33,16 +33,20 @@ func FindEdgeGateway(c *Connector, dcHref string, name string) *EdgeGateway {
 		FilterArg: dcHref,
 	}
 
-	resp := q.Run()
+	resp, err := q.Run()
+	if err != nil {
+		return nil, err
+	}
+
 	data, err := ParseResponse(resp)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	results := t.QueryResultRecords{}
 	err = xml.Unmarshal(*data, &results)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	gwHref := ""
@@ -55,7 +59,7 @@ func FindEdgeGateway(c *Connector, dcHref string, name string) *EdgeGateway {
 
 	gw := NewEdgeGateway(c, gwHref)
 
-	return gw
+	return gw, nil
 }
 
 // NewEdgeGateway ...

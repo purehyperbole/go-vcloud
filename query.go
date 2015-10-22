@@ -27,11 +27,11 @@ func (q *Query) buildQueryURL() string {
 }
 
 // Run ...
-func (q *Query) Run() *http.Response {
+func (q *Query) Run() (*http.Response, error) {
 	href := q.buildQueryURL()
 	resp, err := q.Connector.Get(href)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
-	return resp
+	return resp, nil
 }

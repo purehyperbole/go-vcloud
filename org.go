@@ -21,45 +21,44 @@ type Org struct {
 }
 
 // OrgList ...
-func OrgList(c *Connector) *[]t.OrgListOrg {
+func OrgList(c *Connector) (*[]t.OrgListOrg, error) {
 	resp, err := c.Get("/api/org")
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	data, err := ParseResponse(resp)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	orgList := parseOrgList(data)
 
-	return &orgList.Org
+	return &orgList.Org, nil
 }
 
 // NewOrg ...
-func NewOrg(c *Connector, name string) *Org {
+func NewOrg(c *Connector, name string) (*Org, error) {
 	href := findOrgHref(c, name)
 	oURL, err := url.Parse(href)
-
-	if href == "" && err != nil {
-		log.Println(err)
+	if err != nil {
+		return nil, err
 	}
 
 	resp, err := c.Get(oURL.RequestURI())
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	data, err := ParseResponse(resp)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	org := parseOrg(data)
 	org.Connector = c
 
-	return org
+	return org, nil
 }
 
 func parseOrgList(d *[]byte) *t.OrgList {
@@ -100,10 +99,9 @@ func (o *Org) Networks() []t.Link {
 }
 
 // GetNetwork ...
-func (o *Org) GetNetwork(name string) *Network {
+func (o *Org) GetNetwork(name string) (*Network, error) {
 	url := o.findLink("application/vnd.vmware.vcloud.vdc+xml", name)
-	network := NewNetwork(o.Connector, url)
-	return network
+	return NewNetwork(o.Connector, url)
 }
 
 // Catalogs ...
@@ -113,7 +111,7 @@ func (o *Org) Catalogs() []t.Link {
 }
 
 func findOrgHref(c *Connector, name string) string {
-	orgs := OrgList(c)
+	orgs, _ := OrgList(c)
 	for _, org := range *orgs {
 		if org.Name == name {
 			return org.Href

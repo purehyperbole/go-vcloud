@@ -2,8 +2,10 @@ package vcloud
 
 import (
 	"encoding/xml"
+	"errors"
 	"log"
 	"net/url"
+	"time"
 
 	t "git.r3labs.io/libraries/go-vcloud/types"
 )
@@ -22,31 +24,32 @@ type Task struct {
 	Links         []t.Link   `xml:"Link"`
 	Owner         t.Link     `xml:"Owner"`
 	User          t.Link     `xml:"User"`
+	Error         *t.Error   `xml:"Error"`
 	Organization  t.Link     `xml:"Organization"`
 }
 
 // NewTask ...
-func NewTask(c *Connector, href string) *Task {
+func NewTask(c *Connector, href string) (*Task, error) {
 	tURL, err := url.Parse(href)
 
-	if href == "" && err != nil {
-		log.Println(err)
+	if err != nil {
+		return nil, err
 	}
 
 	resp, err := c.Get(tURL.RequestURI())
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	data, err := ParseResponse(resp)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	t := ParseTask(data)
 	t.Connector = c
 
-	return t
+	return t, nil
 }
 
 // ParseTask ...
@@ -57,4 +60,20 @@ func ParseTask(d *[]byte) *Task {
 		log.Println(err)
 	}
 	return &t
+}
+
+// Wait ...
+func (t *Task) Wait() error {
+	for {
+		if t.Status == "running" {
+			t, _ = NewTask(t.Connector, t.Href)
+		} else {
+			break
+		}
+		time.Sleep(1 * time.Second)
+	}
+	if t.Status == "error" {
+		return errors.New(t.Error.Message)
+	}
+	return nil
 }

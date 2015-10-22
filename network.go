@@ -36,27 +36,26 @@ type Network struct {
 }
 
 // NewNetwork ...
-func NewNetwork(c *Connector, href string) *Network {
+func NewNetwork(c *Connector, href string) (*Network, error) {
 	nURL, err := url.Parse(href)
-
-	if href == "" && err != nil {
-		log.Println(err)
+	if err != nil {
+		return nil, err
 	}
 
 	resp, err := c.Get(nURL.RequestURI())
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	data, err := ParseResponse(resp)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	n := parseNetwork(data)
 	n.Connector = c
 
-	return n
+	return n, nil
 }
 
 func parseNetwork(d *[]byte) *Network {
@@ -69,25 +68,38 @@ func parseNetwork(d *[]byte) *Network {
 }
 
 // Reload ...
-func (n *Network) Reload() {
-	n = NewNetwork(n.Connector, n.Href)
+func (n *Network) Reload() error {
+	nw, err := NewNetwork(n.Connector, n.Href)
+	n = nw
+	return err
 }
 
 // Update ...
-func (n *Network) Update() error {
+func (n *Network) Update() (*Task, error) {
 	nURL, err := url.Parse(n.getAdminHref())
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
+
 	data, err := xml.Marshal(n)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
-	resp, _ := n.Connector.Put(nURL.RequestURI(), data, orgNetworkType)
-	x, _ := ParseResponse(resp)
-	fmt.Println(string(*x))
+
+	resp, err := n.Connector.Put(nURL.RequestURI(), data, orgNetworkType)
+	if err != nil {
+		return nil, err
+	}
+
+	tdata, err := ParseResponse(resp)
+	if err != nil {
+		return nil, err
+	}
+
 	n.Reload()
-	return nil
+	task := ParseTask(tdata)
+
+	return task, nil
 }
 
 // Delete ...

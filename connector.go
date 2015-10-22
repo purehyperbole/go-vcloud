@@ -2,6 +2,7 @@ package vcloud
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -52,8 +53,6 @@ func (c *Connector) Authenticate() error {
 func (c *Connector) Get(uri string) (*http.Response, error) {
 	url := fmt.Sprintf("https://%s%s", c.Config.URL, uri)
 
-	fmt.Println(url)
-
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -67,7 +66,7 @@ func (c *Connector) Get(uri string) (*http.Response, error) {
 	}
 
 	if resp.StatusCode != 200 {
-		fmt.Println("error, non-200 code returned")
+		return nil, newError(resp)
 	}
 
 	return resp, nil
@@ -91,7 +90,7 @@ func (c *Connector) Post(uri string, data []byte, contentType string) (*http.Res
 	}
 
 	if resp.StatusCode != 201 {
-		fmt.Println("error, non-201 code returned")
+		return nil, newError(resp)
 	}
 
 	return resp, nil
@@ -115,9 +114,7 @@ func (c *Connector) Put(uri string, data []byte, contentType string) (*http.Resp
 	}
 
 	if resp.StatusCode != 201 {
-		fmt.Println(url)
-		fmt.Println(string(data))
-		fmt.Println("error, non-201 code returned")
+		return nil, newError(resp)
 	}
 
 	return resp, nil
@@ -140,15 +137,17 @@ func (c *Connector) Delete(uri string) error {
 	}
 
 	if resp.StatusCode != 200 {
-		fmt.Println(resp.StatusCode)
-		data, _ := ParseResponse(resp)
-		fmt.Println(string(*data))
-		fmt.Println("error, non-200 code returned")
+		return newError(resp)
 	}
 
 	return nil
 }
 
-//func newError(bo) error {
-
-//}
+func newError(resp *http.Response) error {
+	data, err := ParseResponse(resp)
+	if err != nil {
+		return err
+	}
+	vcloudErr := ParseError(data)
+	return errors.New(vcloudErr.Message)
+}

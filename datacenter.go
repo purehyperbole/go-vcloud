@@ -2,7 +2,6 @@ package vcloud
 
 import (
 	"encoding/xml"
-	"fmt"
 	"log"
 	"net/url"
 
@@ -55,7 +54,7 @@ func parseDatacenter(d *[]byte) *Datacenter {
 }
 
 // GetEdgeGateway ...
-func (d *Datacenter) GetEdgeGateway(name string) *EdgeGateway {
+func (d *Datacenter) GetEdgeGateway(name string) (*EdgeGateway, error) {
 	return FindEdgeGateway(d.Connector, d.Href, name)
 }
 
@@ -88,15 +87,14 @@ func (d *Datacenter) Networks() []t.Link {
 }
 
 // GetNetwork ...
-func (d *Datacenter) GetNetwork(name string) *Network {
+func (d *Datacenter) GetNetwork(name string) (*Network, error) {
 	var href string
 	for _, n := range d.AvailableNetworks.Networks {
 		if n.Name == name {
 			href = n.Href
 		}
 	}
-	network := NewNetwork(d.Connector, href)
-	return network
+	return NewNetwork(d.Connector, href)
 }
 
 // CreateNetwork ...
@@ -105,23 +103,27 @@ func (d *Datacenter) CreateNetwork(n *Network) (*Network, error) {
 	cnURL, err := url.Parse(links[0].Href)
 
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	data, err := xml.Marshal(n)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	resp, err := d.Connector.Post(cnURL.RequestURI(), data, orgNetworkType)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 	nw := Network{}
 	nwdata, err := ParseResponse(resp)
+	if err != nil {
+		return nil, err
+	}
+
 	err = xml.Unmarshal(*nwdata, &nw)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	return &nw, nil
