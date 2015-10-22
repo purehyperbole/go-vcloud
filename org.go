@@ -10,14 +10,14 @@ import (
 
 // Org ...
 type Org struct {
-	Connector   *Connector
-	XMLName     xml.Name `xml:"Org"`
-	ID          string   `xml:"id,attr"`
-	Name        string   `xml:"name,attr"`
-	Href        string   `xml:"href,attr"`
-	Links       []t.Link `xml:"Link"`
-	Description string   `xml:"Description,value"`
-	FullName    string   `xml:"FullName,value"`
+	Connector   *Connector `xml:"-"`
+	XMLName     xml.Name   `xml:"Org"`
+	ID          string     `xml:"id,attr"`
+	Name        string     `xml:"name,attr"`
+	Href        string     `xml:"href,attr"`
+	Links       []t.Link   `xml:"Link"`
+	Description string     `xml:"Description,value"`
+	FullName    string     `xml:"FullName,value"`
 }
 
 // OrgList ...

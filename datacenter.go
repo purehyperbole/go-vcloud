@@ -11,7 +11,7 @@ import (
 
 // Datacenter ...
 type Datacenter struct {
-	Connector         *Connector
+	Connector         *Connector          `xml:"-"`
 	XMLName           xml.Name            `xml:"Vdc"`
 	Name              string              `xml:"name,attr"`
 	Href              string              `xml:"href,attr"`
@@ -70,10 +70,17 @@ func (d *Datacenter) VApps() []t.Link {
 	return vapps
 }
 
-// GetVapp ...
-//func (d *Datacenter) GetVapp(name string) *VApp {
-
-//}
+// GetVApp ...
+func (d *Datacenter) GetVApp(name string) *VApp {
+	var href string
+	for _, v := range d.VApps() {
+		if v.Name == name {
+			href = v.Href
+		}
+	}
+	vapp := NewVApp(d.Connector, href)
+	return vapp
+}
 
 // Networks ...
 func (d *Datacenter) Networks() []t.Link {
@@ -94,7 +101,7 @@ func (d *Datacenter) GetNetwork(name string) *Network {
 
 // CreateNetwork ...
 func (d *Datacenter) CreateNetwork(n *Network) (*Network, error) {
-	links := d.findLinks("application/vnd.vmware.vcloud.orgVdcNetwork+xml")
+	links := d.findLinks(orgNetworkType)
 	cnURL, err := url.Parse(links[0].Href)
 
 	if err != nil {
@@ -106,7 +113,7 @@ func (d *Datacenter) CreateNetwork(n *Network) (*Network, error) {
 		fmt.Println(err)
 	}
 
-	resp, err := d.Connector.Post(cnURL.RequestURI(), data, "application/vnd.vmware.vcloud.orgVdcNetwork+xml")
+	resp, err := d.Connector.Post(cnURL.RequestURI(), data, orgNetworkType)
 	if err != nil {
 		fmt.Println(err)
 	}

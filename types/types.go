@@ -161,3 +161,11 @@ type GatewayConfiguration struct {
 		} `xml:"GatewayInterface"`
 	} `xml:"GatewayInterfaces"`
 }
+
+// NetworkGateway ...
+type NetworkGateway struct {
+	XMLName xml.Name `xml:"EdgeGateway"`
+	Href    string   `xml:"href,attr"`
+	Name    string   `xml:"name,attr"`
+	Type    string   `xml:"type,attr"`
+}

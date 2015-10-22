@@ -2,32 +2,37 @@ package vcloud
 
 import (
 	"encoding/xml"
+	"fmt"
 	"log"
 	"net/url"
+	"strings"
 
 	t "git.r3labs.io/libraries/go-vcloud/types"
 )
 
+const (
+	orgNetworkType = "application/vnd.vmware.vcloud.orgVdcNetwork+xml"
+)
+
 // Network ...
 type Network struct {
-	Connector     *Connector
-	XMLName       xml.Name `xml:"http://www.vmware.com/vcloud/v1.5 OrgVdcNetwork"`
-	Type          string   `xml:"type,attr,omitempty"`
-	Name          string   `xml:"name,attr,omitempty"`
-	Href          string   `xml:"href,attr,omitempty"`
-	Status        string   `xml:"status,attr,omitempty"`
-	Description   string   `xml:"Description,value"`
+	Connector     *Connector `xml:"-"`
+	XMLName       xml.Name   `xml:"http://www.vmware.com/vcloud/v1.5 OrgVdcNetwork"`
+	XMLNS1        string     `xml:"xmlns:xsi,attr,omitempty"`
+	XMLNS2        string     `xml:"xsi:schemaLocation,attr,omitempty"`
+	Type          string     `xml:"type,attr,omitempty"`
+	Name          string     `xml:"name,attr,omitempty"`
+	Href          string     `xml:"href,attr,omitempty"`
+	ID            string     `xml:"id,attr,omitempty"`
+	Status        string     `xml:"status,attr,omitempty"`
+	Description   string     `xml:"Description,value"`
 	Configuration struct {
 		IPScopes      t.IPScopes `xml:"IpScopes"`
 		FenceMode     string     `xml:"FenceMode"`
 		RetainNetInfo bool       `xml:"RetainNetInfoAcrossDeployments"`
 	} `xml:"Configuration"`
-	EdgeGateway struct {
-		Href string `xml:"href,attr"`
-		Name string `xml:"name,attr"`
-		Type string `xml:"type,attr"`
-	} `xml:"EdgeGateway"`
-	IsShared bool `xml:"IsShared,value,omitempty"`
+	EdgeGateway *t.NetworkGateway `xml:"EdgeGateway,omitempty"`
+	IsShared    bool              `xml:"IsShared,value,omitempty"`
 }
 
 // NewNetwork ...
@@ -63,6 +68,41 @@ func parseNetwork(d *[]byte) *Network {
 	return &n
 }
 
+// Reload ...
+func (n *Network) Reload() {
+	n = NewNetwork(n.Connector, n.Href)
+}
+
+// Update ...
+func (n *Network) Update() error {
+	nURL, err := url.Parse(n.getAdminHref())
+	if err != nil {
+		fmt.Println(err)
+	}
+	data, err := xml.Marshal(n)
+	if err != nil {
+		log.Println(err)
+	}
+	resp, _ := n.Connector.Put(nURL.RequestURI(), data, orgNetworkType)
+	x, _ := ParseResponse(resp)
+	fmt.Println(string(*x))
+	n.Reload()
+	return nil
+}
+
+// Delete ...
+func (n *Network) Delete() error {
+	nURL, err := url.Parse(n.getAdminHref())
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = n.Connector.Delete(nURL.RequestURI())
+	if err != nil {
+		fmt.Println(err)
+	}
+	return nil
+}
+
 // SetIsInherited ...
 func (n *Network) SetIsInherited(inherited bool) {
 	n.configureIPScope()
@@ -95,7 +135,8 @@ func (n *Network) SetGateway(gateway string) {
 
 // SetEdgeGateway ...
 func (n *Network) SetEdgeGateway(href string, name string) {
-	n.EdgeGateway.Type = "application/vnd.vmware.admin.edgeGateway+xml"
+	n.EdgeGateway = &t.NetworkGateway{}
+	n.EdgeGateway.Type = edgeGatewayType
 	n.EdgeGateway.Href = href
 	n.EdgeGateway.Name = name
 }
@@ -145,6 +186,10 @@ func (n *Network) SetFenceMode(mode string) {
 // SetIsShared ...
 func (n *Network) SetIsShared(shared bool) {
 	n.IsShared = shared
+}
+
+func (n *Network) getAdminHref() string {
+	return strings.Replace(n.Href, "/network", "/admin/network", 1)
 }
 
 func (n *Network) configureIPScope() {

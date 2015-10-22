@@ -9,12 +9,16 @@ import (
 	t "git.r3labs.io/libraries/go-vcloud/types"
 )
 
+const (
+	edgeGatewayType = "application/vnd.vmware.admin.edgeGateway+xml"
+)
+
 // EdgeGateway ...
 type EdgeGateway struct {
-	Connector     *Connector
-	XMLName       xml.Name `xml:"EdgeGateway"`
-	Name          string   `xml:"name,attr"`
-	Href          string   `xml:"href,attr"`
+	Connector     *Connector `xml:"-"`
+	XMLName       xml.Name   `xml:"EdgeGateway"`
+	Name          string     `xml:"name,attr"`
+	Href          string     `xml:"href,attr"`
 	Configuration t.GatewayConfiguration
 	Links         []t.Link `xml:"Link"`
 }

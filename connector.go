@@ -98,13 +98,55 @@ func (c *Connector) Post(uri string, data []byte, contentType string) (*http.Res
 }
 
 // Put ...
-func (c *Connector) Put() {
+func (c *Connector) Put(uri string, data []byte, contentType string) (*http.Response, error) {
+	url := fmt.Sprintf("https://%s%s", c.Config.URL, uri)
 
+	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(data))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("accept", "application/*+xml;version=5.5")
+	req.Header.Set("x-vcloud-authorization", c.AuthToken)
+	req.Header.Set("Content-Type", contentType)
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != 201 {
+		fmt.Println(url)
+		fmt.Println(string(data))
+		fmt.Println("error, non-201 code returned")
+	}
+
+	return resp, nil
 }
 
 // Delete ...
-func (c *Connector) Delete() {
+func (c *Connector) Delete(uri string) error {
+	url := fmt.Sprintf("https://%s%s", c.Config.URL, uri)
 
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("accept", "application/*+xml;version=5.5")
+	req.Header.Set("x-vcloud-authorization", c.AuthToken)
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		fmt.Println(resp.StatusCode)
+		data, _ := ParseResponse(resp)
+		fmt.Println(string(*data))
+		fmt.Println("error, non-200 code returned")
+	}
+
+	return nil
 }
 
 //func newError(bo) error {

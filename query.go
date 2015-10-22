@@ -8,7 +8,7 @@ import (
 
 // Query ...
 type Query struct {
-	Connector *Connector
+	Connector *Connector `xml:"-"`
 	Type      string
 	Format    string
 	Filter    string
