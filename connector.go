@@ -2,6 +2,7 @@ package vcloud
 
 import (
 	"bytes"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net/http"
@@ -9,9 +10,11 @@ import (
 
 // Config ...
 type Config struct {
-	URL      string
-	Username string
-	Password string
+	URL           string
+	Username      string
+	Password      string
+	Debug         bool
+	SSLSkipVerify bool
 }
 
 // Connector ...
@@ -24,8 +27,11 @@ type Connector struct {
 // NewConnector ...
 func NewConnector(config *Config) *Connector {
 	connector := Connector{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: config.SSLSkipVerify},
+	}
 	connector.Config = config
-	connector.Client = &http.Client{}
+	connector.Client = &http.Client{Transport: tr}
 	return &connector
 }
 
@@ -43,6 +49,10 @@ func (c *Connector) Authenticate() error {
 	resp, err := c.Client.Do(req)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return newError(resp)
 	}
 
 	c.AuthToken = resp.Header.Get("x-vcloud-authorization")

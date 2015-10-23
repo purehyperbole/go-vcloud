@@ -26,6 +26,7 @@ type Network struct {
 	ID            string     `xml:"id,attr,omitempty"`
 	Status        string     `xml:"status,attr,omitempty"`
 	Description   string     `xml:"Description,value"`
+	Tasks         *Tasks     `xml:"Tasks"`
 	Configuration struct {
 		IPScopes      t.IPScopes `xml:"IpScopes"`
 		FenceMode     string     `xml:"FenceMode"`
@@ -113,6 +114,14 @@ func (n *Network) Delete() error {
 		fmt.Println(err)
 	}
 	return nil
+}
+
+// GetTasks ...
+func (n *Network) GetTasks() []Task {
+	for i := 0; i < len(n.Tasks.Task); i++ {
+		n.Tasks.Task[i].Connector = n.Connector
+	}
+	return n.Tasks.Task
 }
 
 // SetIsInherited ...

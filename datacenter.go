@@ -2,10 +2,15 @@ package vcloud
 
 import (
 	"encoding/xml"
+	"fmt"
 	"log"
 	"net/url"
 
 	t "git.r3labs.io/libraries/go-vcloud/types"
+)
+
+const (
+	instantiateVAppTemplateParamsType = "application/vnd.vmware.vcloud.instantiateVAppTemplateParams+xml"
 )
 
 // Datacenter ...
@@ -21,27 +26,26 @@ type Datacenter struct {
 }
 
 // NewDatacenter ...
-func NewDatacenter(c *Connector, href string) *Datacenter {
+func NewDatacenter(c *Connector, href string) (*Datacenter, error) {
 	dcURL, err := url.Parse(href)
-
-	if href == "" && err != nil {
-		log.Println(err)
+	if err != nil {
+		return nil, err
 	}
 
 	resp, err := c.Get(dcURL.RequestURI())
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	data, err := ParseResponse(resp)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	dc := parseDatacenter(data)
 	dc.Connector = c
 
-	return dc
+	return dc, nil
 }
 
 func parseDatacenter(d *[]byte) *Datacenter {
@@ -70,15 +74,24 @@ func (d *Datacenter) VApps() []t.Link {
 }
 
 // GetVApp ...
-func (d *Datacenter) GetVApp(name string) *VApp {
+func (d *Datacenter) GetVApp(name string) (*VApp, error) {
 	var href string
 	for _, v := range d.VApps() {
 		if v.Name == name {
 			href = v.Href
 		}
 	}
-	vapp := NewVApp(d.Connector, href)
-	return vapp
+	return NewVApp(d.Connector, href)
+}
+
+// CreateVApp ...
+func (d *Datacenter) CreateVApp(request *t.InstantiateVApp) {
+	links := d.findLinks(instantiateVAppTemplateParamsType)
+	cvURL, err := url.Parse(links[0].Href)
+	if err != nil {
+		fmt.Println(cvURL)
+	}
+
 }
 
 // Networks ...
@@ -125,6 +138,8 @@ func (d *Datacenter) CreateNetwork(n *Network) (*Network, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	nw.Connector = d.Connector
 
 	return &nw, nil
 }

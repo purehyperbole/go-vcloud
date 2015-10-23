@@ -86,10 +86,9 @@ func (o *Org) Datacenters() []t.Link {
 }
 
 // GetDatacenter ...
-func (o *Org) GetDatacenter(name string) *Datacenter {
+func (o *Org) GetDatacenter(name string) (*Datacenter, error) {
 	url := o.findLink("application/vnd.vmware.vcloud.vdc+xml", name)
-	datacenter := NewDatacenter(o.Connector, url)
-	return datacenter
+	return NewDatacenter(o.Connector, url)
 }
 
 // Networks ...

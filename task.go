@@ -10,6 +10,12 @@ import (
 	t "git.r3labs.io/libraries/go-vcloud/types"
 )
 
+// Tasks ...
+type Tasks struct {
+	XMLName xml.Name `xml:"Tasks"`
+	Task    []Task   `xml:"Task"`
+}
+
 // Task ...
 type Task struct {
 	Connector     *Connector `xml:"-"`
@@ -66,14 +72,21 @@ func ParseTask(d *[]byte) *Task {
 func (t *Task) Wait() error {
 	for {
 		if t.Status == "running" {
-			t, _ = NewTask(t.Connector, t.Href)
-		} else {
-			break
+			t.Reload()
+		} else if t.Status == "success" {
+			return nil
+		} else if t.Status == "error" {
+			return errors.New(t.Error.Message)
 		}
 		time.Sleep(1 * time.Second)
 	}
-	if t.Status == "error" {
-		return errors.New(t.Error.Message)
+}
+
+// Reload ...
+func (t *Task) Reload() error {
+	updated, err := NewTask(t.Connector, t.Href)
+	if err == nil {
+		t = updated
 	}
-	return nil
+	return err
 }

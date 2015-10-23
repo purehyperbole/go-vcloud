@@ -17,31 +17,32 @@ type VApp struct {
 	Status    string     `xml:"status,attr"`
 	Deployed  bool       `xml:"deployed,attr"`
 	Links     []t.Link   `xml:"Link"`
+	Tasks     *Tasks     `xml:"Tasks"`
 	//NetworkConfig t.
 }
 
 // NewVApp ...
-func NewVApp(c *Connector, href string) *VApp {
+func NewVApp(c *Connector, href string) (*VApp, error) {
 	vURL, err := url.Parse(href)
 
-	if href == "" && err != nil {
-		log.Println(err)
+	if err != nil {
+		return nil, err
 	}
 
 	resp, err := c.Get(vURL.RequestURI())
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	data, err := ParseResponse(resp)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	v := parseVApp(data)
 	v.Connector = c
 
-	return v
+	return v, nil
 }
 
 func parseVApp(d *[]byte) *VApp {
@@ -51,4 +52,12 @@ func parseVApp(d *[]byte) *VApp {
 		log.Println(err)
 	}
 	return &v
+}
+
+// GetTasks ...
+func (v *VApp) GetTasks() []Task {
+	for i := 0; i < len(v.Tasks.Task); i++ {
+		v.Tasks.Task[i].Connector = v.Connector
+	}
+	return v.Tasks.Task
 }
