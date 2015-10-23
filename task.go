@@ -71,9 +71,8 @@ func ParseTask(d *[]byte) *Task {
 // Wait ...
 func (t *Task) Wait() error {
 	for {
-		if t.Status == "running" {
-			t.Reload()
-		} else if t.Status == "success" {
+		t, _ = NewTask(t.Connector, t.Href)
+		if t.Status == "success" {
 			return nil
 		} else if t.Status == "error" {
 			return errors.New(t.Error.Message)

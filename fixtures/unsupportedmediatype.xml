@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Error xmlns="http://www.vmware.com/vcloud/v1.5" minorErrorCode="UNSUPPORTED_MEDIA_TYPE" message="Unsupported Media Type" majorErrorCode="415" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://vcloud.example.com/api/v1.5/schema/master.xsd"></Error>

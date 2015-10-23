@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OrgList xmlns="http://www.vmware.com/vcloud/v1.5" type="application/vnd.vmware.vcloud.orgList+xml" href="https://vcloud.example.com/api/org/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://vcloud.example.com/api/v1.5/schema/master.xsd">
+    <Org type="application/vnd.vmware.vcloud.org+xml" name="test" href="https://vcloud.example.com/api/org/812f6b09-fc00-43ce-97f9-e32762ba8df4"/>
+</OrgList>

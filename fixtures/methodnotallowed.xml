@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Error xmlns="http://www.vmware.com/vcloud/v1.5" minorErrorCode="METHOD_NOT_ALLOWED" message="HTTP method not allowed" majorErrorCode="405" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://vcloud.example.com/api/v1.5/schema/master.xsd"></Error>
