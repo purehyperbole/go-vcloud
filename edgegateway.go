@@ -4,7 +4,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"log"
-	"net/url"
 
 	t "git.r3labs.io/libraries/go-vcloud/types"
 )
@@ -64,13 +63,7 @@ func FindEdgeGateway(c *Connector, dcHref string, name string) (*EdgeGateway, er
 
 // NewEdgeGateway ...
 func NewEdgeGateway(c *Connector, href string) *EdgeGateway {
-	gwURL, err := url.Parse(href)
-
-	if href == "" && err != nil {
-		log.Println(err)
-	}
-
-	resp, err := c.Get(gwURL.RequestURI())
+	resp, err := c.Get(href)
 	if err != nil {
 		fmt.Println(err)
 	}

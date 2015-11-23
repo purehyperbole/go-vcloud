@@ -3,7 +3,6 @@ package vcloud
 import (
 	"encoding/xml"
 	"log"
-	"net/url"
 
 	t "git.r3labs.io/libraries/go-vcloud/types"
 )
@@ -23,13 +22,7 @@ type VApp struct {
 
 // NewVApp ...
 func NewVApp(c *Connector, href string) (*VApp, error) {
-	vURL, err := url.Parse(href)
-
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := c.Get(vURL.RequestURI())
+	resp, err := c.Get(href)
 	if err != nil {
 		return nil, err
 	}

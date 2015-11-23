@@ -27,12 +27,7 @@ type Datacenter struct {
 
 // NewDatacenter ...
 func NewDatacenter(c *Connector, href string) (*Datacenter, error) {
-	dcURL, err := url.Parse(href)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := c.Get(dcURL.RequestURI())
+	resp, err := c.Get(href)
 	if err != nil {
 		return nil, err
 	}
@@ -113,18 +108,14 @@ func (d *Datacenter) GetNetwork(name string) (*Network, error) {
 // CreateNetwork ...
 func (d *Datacenter) CreateNetwork(n *Network) (*Network, error) {
 	links := d.findLinks(orgNetworkType)
-	cnURL, err := url.Parse(links[0].Href)
-
-	if err != nil {
-		return nil, err
-	}
+	href := links[0].Href
 
 	data, err := xml.Marshal(n)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := d.Connector.Post(cnURL.RequestURI(), data, orgNetworkType)
+	resp, err := d.Connector.Post(href, data, orgNetworkType)
 	if err != nil {
 		return nil, err
 	}

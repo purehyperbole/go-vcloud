@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -60,16 +61,12 @@ func (c *Connector) Authenticate() error {
 }
 
 // Get ...
-func (c *Connector) Get(uri string) (*http.Response, error) {
-	url := fmt.Sprintf("https://%s%s", c.Config.URL, uri)
-
-	req, err := http.NewRequest("GET", url, nil)
+func (c *Connector) Get(url string) (*http.Response, error) {
+	req, err := c.newRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("accept", "application/*+xml;version=5.5")
-	req.Header.Set("x-vcloud-authorization", c.AuthToken)
 	resp, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
@@ -83,16 +80,12 @@ func (c *Connector) Get(uri string) (*http.Response, error) {
 }
 
 // Post ...
-func (c *Connector) Post(uri string, data []byte, contentType string) (*http.Response, error) {
-	url := fmt.Sprintf("https://%s%s", c.Config.URL, uri)
-
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+func (c *Connector) Post(url string, data []byte, contentType string) (*http.Response, error) {
+	req, err := c.newRequest("POST", url, bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("accept", "application/*+xml;version=5.5")
-	req.Header.Set("x-vcloud-authorization", c.AuthToken)
 	req.Header.Set("Content-Type", contentType)
 	resp, err := c.Client.Do(req)
 	if err != nil {
@@ -107,16 +100,12 @@ func (c *Connector) Post(uri string, data []byte, contentType string) (*http.Res
 }
 
 // Put ...
-func (c *Connector) Put(uri string, data []byte, contentType string) (*http.Response, error) {
-	url := fmt.Sprintf("https://%s%s", c.Config.URL, uri)
-
-	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(data))
+func (c *Connector) Put(url string, data []byte, contentType string) (*http.Response, error) {
+	req, err := c.newRequest("PUT", url, bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("accept", "application/*+xml;version=5.5")
-	req.Header.Set("x-vcloud-authorization", c.AuthToken)
 	req.Header.Set("Content-Type", contentType)
 	resp, err := c.Client.Do(req)
 	if err != nil {
@@ -132,15 +121,11 @@ func (c *Connector) Put(uri string, data []byte, contentType string) (*http.Resp
 
 // Delete ...
 func (c *Connector) Delete(uri string) error {
-	url := fmt.Sprintf("https://%s%s", c.Config.URL, uri)
-
-	req, err := http.NewRequest("DELETE", url, nil)
+	req, err := c.newRequest("DELETE", uri, nil)
 	if err != nil {
 		return err
 	}
 
-	req.Header.Set("accept", "application/*+xml;version=5.5")
-	req.Header.Set("x-vcloud-authorization", c.AuthToken)
 	resp, err := c.Client.Do(req)
 	if err != nil {
 		return err
@@ -151,6 +136,15 @@ func (c *Connector) Delete(uri string) error {
 	}
 
 	return nil
+}
+
+func (c *Connector) newRequest(method string, url string, payload io.Reader) (*http.Request, error) {
+	req, err := http.NewRequest(method, url, payload)
+
+	req.Header.Set("accept", "application/*+xml;version=5.5")
+	req.Header.Set("x-vcloud-authorization", c.AuthToken)
+
+	return req, err
 }
 
 func newError(resp *http.Response) error {

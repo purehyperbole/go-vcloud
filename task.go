@@ -4,7 +4,6 @@ import (
 	"encoding/xml"
 	"errors"
 	"log"
-	"net/url"
 	"time"
 
 	t "git.r3labs.io/libraries/go-vcloud/types"
@@ -36,13 +35,7 @@ type Task struct {
 
 // NewTask ...
 func NewTask(c *Connector, href string) (*Task, error) {
-	tURL, err := url.Parse(href)
-
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := c.Get(tURL.RequestURI())
+	resp, err := c.Get(href)
 	if err != nil {
 		return nil, err
 	}

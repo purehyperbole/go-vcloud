@@ -2,8 +2,8 @@ package vcloud
 
 import (
 	"encoding/xml"
+	"fmt"
 	"log"
-	"net/url"
 
 	t "git.r3labs.io/libraries/go-vcloud/types"
 )
@@ -22,7 +22,8 @@ type Org struct {
 
 // OrgList ...
 func OrgList(c *Connector) (*[]t.OrgListOrg, error) {
-	resp, err := c.Get("/api/org")
+	href := fmt.Sprintf("https://%s/api/org", c.Config.URL)
+	resp, err := c.Get(href)
 	if err != nil {
 		return nil, err
 	}
@@ -40,12 +41,7 @@ func OrgList(c *Connector) (*[]t.OrgListOrg, error) {
 // NewOrg ...
 func NewOrg(c *Connector, name string) (*Org, error) {
 	href := findOrgHref(c, name)
-	oURL, err := url.Parse(href)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := c.Get(oURL.RequestURI())
+	resp, err := c.Get(href)
 	if err != nil {
 		return nil, err
 	}

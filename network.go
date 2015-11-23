@@ -4,7 +4,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"log"
-	"net/url"
 	"strings"
 
 	t "git.r3labs.io/libraries/go-vcloud/types"
@@ -38,12 +37,7 @@ type Network struct {
 
 // NewNetwork ...
 func NewNetwork(c *Connector, href string) (*Network, error) {
-	nURL, err := url.Parse(href)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := c.Get(nURL.RequestURI())
+	resp, err := c.Get(href)
 	if err != nil {
 		return nil, err
 	}
@@ -77,17 +71,12 @@ func (n *Network) Reload() error {
 
 // Update ...
 func (n *Network) Update() (*Task, error) {
-	nURL, err := url.Parse(n.getAdminHref())
-	if err != nil {
-		return nil, err
-	}
-
 	data, err := xml.Marshal(n)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := n.Connector.Put(nURL.RequestURI(), data, orgNetworkType)
+	resp, err := n.Connector.Put(n.getAdminHref(), data, orgNetworkType)
 	if err != nil {
 		return nil, err
 	}
@@ -105,11 +94,7 @@ func (n *Network) Update() (*Task, error) {
 
 // Delete ...
 func (n *Network) Delete() error {
-	nURL, err := url.Parse(n.getAdminHref())
-	if err != nil {
-		fmt.Println(err)
-	}
-	err = n.Connector.Delete(nURL.RequestURI())
+	err := n.Connector.Delete(n.getAdminHref())
 	if err != nil {
 		fmt.Println(err)
 	}
